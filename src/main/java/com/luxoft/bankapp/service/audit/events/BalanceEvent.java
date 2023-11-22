@@ -7,3 +7,4 @@ public class BalanceEvent extends AccountEvent
         super("BALANCE CHECK", accountId);
     }
 }
+

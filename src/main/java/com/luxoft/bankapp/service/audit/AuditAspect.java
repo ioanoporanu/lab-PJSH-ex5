@@ -39,9 +39,9 @@ public class AuditAspect
     {
         Object[] methodArgs = joinPoint.getArgs();
 
-        audit.auditDeposit(getAccountId(methodArgs),
-                (double) methodArgs[1]);
-
+        applicationContext.publishEvent(
+                new DepositEvent(getAccountId(methodArgs),
+                        (double) methodArgs[1]));
     }
 
 
@@ -52,24 +52,28 @@ public class AuditAspect
 
         long accountId = getAccountId(methodArgs);
 
-        audit.auditWithdraw(accountId,
-                (double) methodArgs[1], WithdrawState.TRYING);
-
         Object result;
 
         try
         {
+            applicationContext.publishEvent(
+                    new WithdrawEvent(getAccountId(methodArgs),
+                            (double) methodArgs[1]));
+
             result = thisJoinPoint.proceed();
 
-            audit.auditWithdraw(accountId,
-                    (double) methodArgs[1],
-                    WithdrawState.SUCCESSFUL);
+            applicationContext.publishEvent(
+                    new WithdrawEvent(getAccountId(methodArgs),
+                            (double) methodArgs[1],
+                            WithdrawEvent.State.SUCCESSFUL));
         }
         catch (Exception e)
         {
-            audit.auditWithdraw(accountId,
-                    (double) methodArgs[1],
-                    WithdrawState.FAILED);
+            applicationContext.publishEvent(
+                    new WithdrawEvent(getAccountId(methodArgs),
+                            (double) methodArgs[1],
+                            WithdrawEvent.State.FAILED));
+
 
             throw e;
         }
@@ -82,7 +86,8 @@ public class AuditAspect
     {
         Object[] methodArgs = joinPoint.getArgs();
 
-        audit.auditBalance(getAccountId(methodArgs));
+        applicationContext.publishEvent(
+                new BalanceEvent(getAccountId(methodArgs)));
     }
 
     private long getAccountId(Object[] methodArgs)

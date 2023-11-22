@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+
 @SpringBootTest(classes = BankApplication.class)
 public class BankApplicationTests4
 {
@@ -23,7 +24,8 @@ public class BankApplicationTests4
     private Banking banking;
 
     @Autowired
-    private BankingOperationsService bankingOperationsService;
+    private BankingOperationsService
+            bankingOperationsService;
 
     @Autowired
     private AuditService auditService;
@@ -43,11 +45,13 @@ public class BankApplicationTests4
     {
         double amount = 100;
 
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
         bankingOperationsService.deposit(client, amount);
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 1);
+        assertEquals( countOfEvents + 1,
+                auditService.getEvents().size());
     }
 
     @Test
@@ -56,22 +60,26 @@ public class BankApplicationTests4
         Account account = client.getActiveAccount();
         double amount = 100;
 
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
-        bankingOperationsService.deposit(account, amount);
+        bankingOperationsService
+                .deposit(account, amount);
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 1);
+        assertEquals( countOfEvents + 1,
+                auditService.getEvents().size());
     }
 
     @Test
     public void getClientBalance()
     {
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
         bankingOperationsService.getBalance(client);
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 1);
-
+        assertEquals( countOfEvents + 1,
+                auditService.getEvents().size());
     }
 
     @Test
@@ -79,12 +87,14 @@ public class BankApplicationTests4
     {
         double amount = 100;
 
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
-        bankingOperationsService.withdraw(client, amount);
+        bankingOperationsService
+                .withdraw(client, amount);
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 2);
-
+        assertEquals( countOfEvents + 2,
+                auditService.getEvents().size());
     }
 
     @Test
@@ -93,11 +103,14 @@ public class BankApplicationTests4
         Account account = client.getActiveAccount();
         double amount = 100;
 
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
-        bankingOperationsService.withdraw(account, amount);
+        bankingOperationsService
+                .withdraw(account, amount);
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 2);
+        assertEquals( countOfEvents + 2,
+                auditService.getEvents().size());
     }
 
     @Test
@@ -109,17 +122,22 @@ public class BankApplicationTests4
 
         if (account instanceof CheckingAccount)
         {
-            overdraft = ((CheckingAccount) account).getOverdraft();
+            overdraft =
+                    ((CheckingAccount) account).getOverdraft();
         }
 
         double amount = balance + overdraft + 1000;
 
-        int countOfEvents = auditService.getEvents().size();
+        int countOfEvents =
+                auditService.getEvents().size();
 
         assertThrows(NotEnoughFundsException.class,
-                () -> bankingOperationsService.withdraw(account, amount));
+                () ->
+                        bankingOperationsService
+                                .withdraw(account, amount));
 
-        assertEquals(auditService.getEvents().size(), countOfEvents + 2);
+        assertEquals(auditService.getEvents().size(),
+                countOfEvents + 2);
     }
 
 }

@@ -15,3 +15,4 @@ public class DepositEvent extends AccountEvent
         return amount;
     }
 }
+
