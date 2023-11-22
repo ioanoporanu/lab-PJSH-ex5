@@ -13,3 +13,10 @@ debug: true
 spring:
     profiles: prod
 debug: false
+
+---
+
+audit.amount:
+    deposit: 99
+    withdrawal: 99
+
