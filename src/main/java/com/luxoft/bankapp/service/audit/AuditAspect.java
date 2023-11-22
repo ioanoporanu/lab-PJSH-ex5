@@ -22,6 +22,9 @@ public class AuditAspect
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private Audit audit;
+
     @Pointcut("execution(* com.luxoft.bankapp.service.operations.*.deposit(..))")
     public void anyDeposit() {}
 
@@ -36,32 +39,38 @@ public class AuditAspect
     {
         Object[] methodArgs = joinPoint.getArgs();
 
-        applicationContext.publishEvent(
-                new DepositEvent(getAccountId(methodArgs), (double) methodArgs[1]));
+        audit.auditDeposit(getAccountId(methodArgs),
+                (double) methodArgs[1]);
+
     }
+
 
     @Around("anyWithdraw()")
     public Object logWithdrawal(ProceedingJoinPoint thisJoinPoint) throws Throwable
     {
         Object[] methodArgs = thisJoinPoint.getArgs();
 
-        applicationContext.publishEvent(
-                new WithdrawEvent(getAccountId(methodArgs), (double) methodArgs[1]));
+        long accountId = getAccountId(methodArgs);
+
+        audit.auditWithdraw(accountId,
+                (double) methodArgs[1], WithdrawState.TRYING);
 
         Object result;
+
         try
         {
             result = thisJoinPoint.proceed();
 
-            applicationContext.publishEvent(
-                    new WithdrawEvent(getAccountId(methodArgs),
-                            (double) methodArgs[1], WithdrawEvent.State.SUCCESSFUL));
+            audit.auditWithdraw(accountId,
+                    (double) methodArgs[1],
+                    WithdrawState.SUCCESSFUL);
         }
         catch (Exception e)
         {
-            applicationContext.publishEvent(
-                    new WithdrawEvent(getAccountId(methodArgs),
-                            (double) methodArgs[1], WithdrawEvent.State.FAILED));
+            audit.auditWithdraw(accountId,
+                    (double) methodArgs[1],
+                    WithdrawState.FAILED);
+
             throw e;
         }
 
@@ -73,8 +82,7 @@ public class AuditAspect
     {
         Object[] methodArgs = joinPoint.getArgs();
 
-        applicationContext.publishEvent(
-                new BalanceEvent(getAccountId(methodArgs)));
+        audit.auditBalance(getAccountId(methodArgs));
     }
 
     private long getAccountId(Object[] methodArgs)
@@ -83,7 +91,8 @@ public class AuditAspect
 
         if (methodArgs[0] instanceof Client)
         {
-            account = ((Client)  methodArgs[0]).getActiveAccount();
+            account = ((Client)  methodArgs[0])
+                    .getActiveAccount();
         }
         else
         {
@@ -92,4 +101,5 @@ public class AuditAspect
 
         return account.getId();
     }
+
 }

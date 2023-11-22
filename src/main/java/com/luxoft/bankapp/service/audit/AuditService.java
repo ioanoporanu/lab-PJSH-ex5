@@ -19,32 +19,39 @@ public class AuditService implements Audit
         this.events = new ArrayList<>(100);
     }
 
-    @Override
-    @EventListener
-    public void auditOperation(DepositEvent event)
-    {
-        events.add(event);
-        System.out.println("ACCOUNT ID: " + event.getAccountId() + " " + event.getSource() + ": " + event.getAmount());
-    }
-
-    @Override
-    @EventListener
-    public void auditOperation(WithdrawEvent event)
-    {
-        events.add(event);
-        System.out.println("ACCOUNT ID: " + event.getAccountId() + " " + event.getState() + " " + event.getSource() + ": " + event.getAmount());
-    }
-
-    @Override
-    @EventListener
-    public void auditOperation(BalanceEvent event)
-    {
-        events.add(event);
-        System.out.println("ACCOUNT ID: " + event.getAccountId() + " " + event.getSource());
-    }
-
     public List<AccountEvent> getEvents()
     {
         return new ArrayList<>(events);
     }
+
+    @Override
+    public void auditDeposit(long accountId,
+                             double amount)
+    {
+        System.out.println("ACCOUNT ID: "
+                + accountId + " DEPOSIT: " + amount);
+
+        this.events.add(new DepositEvent(accountId, amount));
+    }
+
+    @Override
+    public void auditWithdraw(long accountId,
+                              double amount, WithdrawState state)
+    {
+        System.out.println("ACCOUNT ID: "
+                + accountId + " " + state
+                + " WITHDRAWAL: " + amount);
+
+        this.events.add(new WithdrawEvent(accountId, amount));
+    }
+
+    @Override
+    public void auditBalance(long accountId)
+    {
+        System.out.println("ACCOUNT ID: "
+                + accountId + " BALANCE CHECK");
+
+        this.events.add(new BalanceEvent(accountId));
+    }
+
 }
